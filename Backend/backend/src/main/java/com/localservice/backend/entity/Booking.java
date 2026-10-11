@@ -22,7 +22,7 @@ public class Booking {
     // Provider who will perform the service
     @ManyToOne
     @JoinColumn(name = "provider_id", nullable = false)
-    private User provider;
+    private Provider provider;
 
     // Service being booked
     @ManyToOne
@@ -87,11 +87,11 @@ public class Booking {
     }
 
 
-    public User getProvider() {
+    public Provider getProvider() {
         return provider;
     }
 
-    public void setProvider(User provider) {
+    public void setProvider(Provider provider) {
         this.provider = provider;
     }
 

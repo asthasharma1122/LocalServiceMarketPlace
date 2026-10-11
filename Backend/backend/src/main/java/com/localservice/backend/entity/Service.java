@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 public class Service {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "service_id")
     private Integer serviceId;
 
     @ManyToOne
@@ -39,7 +41,7 @@ public class Service {
     private LocalDateTime createdAt;
 
     // =========================
-    // Constructors
+    // Constructor
     // =========================
 
     public Service() {

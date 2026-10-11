@@ -3,10 +3,13 @@ package com.localservice.backend.auth;
 
 import com.localservice.backend.auth.dto.LoginRequest;
 import com.localservice.backend.auth.dto.RegisterRequest;
+import com.localservice.backend.entity.Provider;
 import com.localservice.backend.entity.User;
 import com.localservice.backend.entity.UserRole;
 import com.localservice.backend.entity.UserStatus;
+import com.localservice.backend.repository.ProviderRepository;
 import com.localservice.backend.repository.UserRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,9 +18,14 @@ import java.time.LocalDateTime;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final ProviderRepository providerRepository;
 
-    public AuthService(UserRepository userRepository) {
+    public AuthService(
+            UserRepository userRepository,
+            ProviderRepository providerRepository) {
+
         this.userRepository = userRepository;
+        this.providerRepository = providerRepository;
     }
 
     // =========================
@@ -47,9 +55,10 @@ public class AuthService {
         user.setPasswordHash(request.getPassword());
 
         // Convert role string to UserRole enum
-        user.setRole(
-                UserRole.valueOf(request.getRole().toUpperCase())
-        );
+        UserRole role =
+                UserRole.valueOf(request.getRole().toUpperCase());
+
+        user.setRole(role);
 
         user.setLocation(request.getLocation());
 
@@ -59,7 +68,28 @@ public class AuthService {
         // Set creation time
         user.setCreatedAt(LocalDateTime.now());
 
-        return userRepository.save(user);
+        // Save user first
+        User savedUser = userRepository.save(user);
+
+        // =========================
+        // CREATE PROVIDER PROFILE
+        // =========================
+        if (role == UserRole.PROVIDER) {
+
+            Provider provider = new Provider();
+
+            provider.setUser(savedUser);
+
+            provider.setBusinessName(savedUser.getName());
+
+            provider.setDescription(
+                    "Service provider profile"
+            );
+
+            providerRepository.save(provider);
+        }
+
+        return savedUser;
     }
 
     // =========================
@@ -70,20 +100,24 @@ public class AuthService {
         // Find user by email
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() ->
-                        new RuntimeException("Invalid email or password")
-                );
+                        new RuntimeException(
+                                "Invalid email or password"
+                        ));
 
         // Check password
         if (!user.getPasswordHash().equals(request.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
+            throw new RuntimeException(
+                    "Invalid email or password"
+            );
         }
 
         // Check account status
         if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new RuntimeException("User account is not active");
+            throw new RuntimeException(
+                    "User account is not active"
+            );
         }
 
         return user;
     }
 }
-

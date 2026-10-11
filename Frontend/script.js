@@ -72,9 +72,12 @@ function logout() {
 // REGISTRATION
 // ============================================================
 
+// ============================================================
+// REGISTRATION
+// ============================================================
+
 const registerForm =
     document.getElementById("registerForm");
-
 
 if (registerForm) {
 
@@ -84,36 +87,34 @@ if (registerForm) {
 
             event.preventDefault();
 
+            // IDs must match register.html
             const name =
-                document.getElementById("registerName")?.value.trim();
+                document.getElementById("name")?.value.trim();
 
             const phone =
-                document.getElementById("registerPhone")?.value.trim();
+                document.getElementById("phone")?.value.trim();
 
             const email =
-                document.getElementById("registerEmail")?.value.trim();
+                document.getElementById("email")?.value.trim();
 
             const password =
-                document.getElementById("registerPassword")?.value;
+                document.getElementById("password")?.value;
 
             const location =
-                document.getElementById("registerLocation")?.value.trim();
-
-            const roleElement =
-                document.getElementById("registerRole");
+                document.getElementById("location")?.value.trim();
 
             const role =
-                roleElement
-                    ? roleElement.value
-                    : "CUSTOMER";
+                document.getElementById("role")?.value;
 
 
+            // Validate required fields
             if (
                 !name ||
                 !phone ||
                 !email ||
                 !password ||
-                !location
+                !location ||
+                !role
             ) {
 
                 alert(
@@ -195,7 +196,6 @@ if (registerForm) {
     );
 
 }
-
 
 // ============================================================
 // LOGIN
@@ -323,78 +323,83 @@ if (loginForm) {
 // CUSTOMER DASHBOARD - USER INFORMATION
 // ============================================================
 
-function populateCustomerAccount() {
-
+function populateUserAccount() {
     if (!loggedInUser) {
         return;
     }
 
+    // ================= PROVIDER DASHBOARD =================
 
-    const userName =
-        document.getElementById("userName");
+    const providerName = document.getElementById("providerName");
+    const providerWelcomeName = document.getElementById("providerWelcomeName");
+    const providerAccountName = document.getElementById("providerAccountName");
+    const providerAccountEmail = document.getElementById("providerAccountEmail");
+    const providerAccountPhone = document.getElementById("providerAccountPhone");
+    const providerAccountLocation = document.getElementById("providerAccountLocation");
 
-    const welcomeName =
-        document.getElementById("welcomeName");
+    if (providerName) {
+        providerName.textContent = loggedInUser.name || "-";
+    }
 
-    const accountName =
-        document.getElementById("accountName");
+    if (providerWelcomeName) {
+        providerWelcomeName.textContent = loggedInUser.name || "Provider";
+    }
 
-    const accountEmail =
-        document.getElementById("accountEmail");
+    if (providerAccountName) {
+        providerAccountName.textContent = loggedInUser.name || "-";
+    }
 
-    const accountPhone =
-        document.getElementById("accountPhone");
+    if (providerAccountEmail) {
+        providerAccountEmail.textContent = loggedInUser.email || "-";
+    }
 
-    const accountLocation =
-        document.getElementById("accountLocation");
+    if (providerAccountPhone) {
+        providerAccountPhone.textContent = loggedInUser.phone || "-";
+    }
 
-    const accountRole =
-        document.getElementById("accountRole");
+    if (providerAccountLocation) {
+        providerAccountLocation.textContent = loggedInUser.location || "-";
+    }
 
+
+    // ================= CUSTOMER DASHBOARD =================
+
+    const userName = document.getElementById("userName");
+    const welcomeName = document.getElementById("welcomeName");
+    const accountName = document.getElementById("accountName");
+    const accountEmail = document.getElementById("accountEmail");
+    const accountPhone = document.getElementById("accountPhone");
+    const accountLocation = document.getElementById("accountLocation");
+    const accountRole = document.getElementById("accountRole");
 
     if (userName) {
-        userName.textContent =
-            loggedInUser.name || "Customer";
+        userName.textContent = loggedInUser.name || "-";
     }
-
 
     if (welcomeName) {
-        welcomeName.textContent =
-            loggedInUser.name || "Customer";
+        welcomeName.textContent = loggedInUser.name || "Customer";
     }
-
 
     if (accountName) {
-        accountName.textContent =
-            loggedInUser.name || "-";
+        accountName.textContent = loggedInUser.name || "-";
     }
-
 
     if (accountEmail) {
-        accountEmail.textContent =
-            loggedInUser.email || "-";
+        accountEmail.textContent = loggedInUser.email || "-";
     }
-
 
     if (accountPhone) {
-        accountPhone.textContent =
-            loggedInUser.phone || "-";
+        accountPhone.textContent = loggedInUser.phone || "-";
     }
-
 
     if (accountLocation) {
-        accountLocation.textContent =
-            loggedInUser.location || "-";
+        accountLocation.textContent = loggedInUser.location || "-";
     }
-
 
     if (accountRole) {
-        accountRole.textContent =
-            loggedInUser.role || "-";
+        accountRole.textContent = loggedInUser.role || "CUSTOMER";
     }
-
 }
-
 
 // ============================================================
 // CUSTOMER SERVICE CATEGORIES
@@ -1513,75 +1518,57 @@ function findServices() {
 // CUSTOMER - MY BOOKINGS
 // ============================================================
 
+
+// ============================================================
+// CUSTOMER - MY BOOKINGS
+// ============================================================
+
 async function viewBookings() {
 
     const bookingsSection =
-        document.getElementById(
-            "bookingsSection"
-        );
-
+        document.getElementById("bookingsSection");
 
     const bookingsContainer =
-        document.getElementById(
-            "customerBookings"
-        );
+        document.getElementById("customerBookings");
 
-
-    if (
-        !bookingsSection ||
-        !bookingsContainer
-    ) {
-
+    if (!bookingsSection || !bookingsContainer) {
         return;
-
     }
 
-
-    bookingsSection.style.display =
-        "block";
-
+    // Show bookings section
+    bookingsSection.style.display = "block";
 
     bookingsSection.scrollIntoView({
         behavior: "smooth"
     });
 
-
-    if (
-        !loggedInUser ||
-        !loggedInUser.userId
-    ) {
+    // Check logged-in user
+    if (!loggedInUser || !loggedInUser.userId) {
 
         bookingsContainer.innerHTML = `
-
             <p>
                 Please login again to view your bookings.
             </p>
-
         `;
 
         return;
-
     }
-
 
     try {
 
         bookingsContainer.innerHTML = `
-
             <p class="services-loading">
-
                 Loading your bookings...
-
             </p>
-
         `;
 
+        // ====================================================
+        // GET CUSTOMER BOOKINGS
+        // ====================================================
 
-        const response =
-            await fetch(
-                `http://localhost:8080/api/bookings/customer/${loggedInUser.userId}`
-            );
-
+        const response = await fetch(
+            `http://localhost:8080/api/bookings/customer/${loggedInUser.userId}`
+        );
 
         if (!response.ok) {
 
@@ -1597,21 +1584,23 @@ async function viewBookings() {
             throw new Error(
                 "Unable to load bookings."
             );
-
         }
-
 
         const bookings =
             await response.json();
 
+        console.log(
+            "Customer bookings:",
+            bookings
+        );
 
-        if (
-            !bookings ||
-            bookings.length === 0
-        ) {
+        // ====================================================
+        // NO BOOKINGS
+        // ====================================================
+
+        if (!bookings || bookings.length === 0) {
 
             bookingsContainer.innerHTML = `
-
                 <div class="dashboard-card">
 
                     <div class="dashboard-card-icon">
@@ -1635,110 +1624,131 @@ async function viewBookings() {
                     </button>
 
                 </div>
-
             `;
 
             return;
-
         }
 
+        // ====================================================
+        // DISPLAY BOOKINGS
+        // ====================================================
 
         bookingsContainer.innerHTML =
-            bookings.map(
-                booking => {
+            bookings.map(booking => {
 
-                    const serviceName =
-                        booking.service?.serviceName ||
-                        "Service";
+                // Backend returns serviceName directly
+                const serviceName =
+                    booking.serviceName ||
+                    "Service";
 
+                // Backend returns providerName directly
+                const providerName =
+                    booking.providerName ||
+                    "Professional";
 
-                    const providerName =
-                        booking.service?.provider?.name ||
-                        booking.service?.providerName ||
-                        "Professional";
+                // Format date
+                let bookingDate =
+                    "Not specified";
 
+                if (booking.bookingDate) {
 
-                    const bookingDate =
-                        booking.bookingDate
-                            ? new Date(
-                                booking.bookingDate
-                            ).toLocaleString()
-                            : "Not specified";
+                    const date =
+                        new Date(booking.bookingDate);
 
+                    bookingDate =
+                        date.toLocaleDateString(
+                            "en-IN",
+                            {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric"
+                            }
+                        );
+                }
 
-                    const price =
-                        booking.totalPrice != null
-                            ? `₹${booking.totalPrice}`
-                            : "Price unavailable";
+                // Price
+                const price =
+                    booking.totalPrice != null
+                        ? `₹${booking.totalPrice}`
+                        : "Price unavailable";
 
+                // Status
+                const status =
+                    booking.status ||
+                    "PENDING";
 
-                    const status =
-                        booking.status ||
-                        "PENDING";
+                return `
+                    <div class="dashboard-card">
 
-
-                    return `
-
-                        <div class="dashboard-card">
-
-                            <div class="dashboard-card-icon">
-                                📅
-                            </div>
-
-                            <h3>
-                                ${serviceName}
-                            </h3>
-
-                            <p>
-                                <strong>
-                                    Professional:
-                                </strong>
-
-                                ${providerName}
-                            </p>
-
-                            <p>
-                                <strong>
-                                    Date:
-                                </strong>
-
-                                ${bookingDate}
-                            </p>
-
-                            <p>
-                                <strong>
-                                    Address:
-                                </strong>
-
-                                ${booking.address || "Not provided"}
-                            </p>
-
-                            <p>
-                                <strong>
-                                    Price:
-                                </strong>
-
-                                ${price}
-                            </p>
-
-                            <p>
-                                <strong>
-                                    Status:
-                                </strong>
-
-                                ${status}
-                            </p>
-
+                        <div class="dashboard-card-icon">
+                            📅
                         </div>
 
-                    `;
+                        <h3>
+                            ${serviceName}
+                        </h3>
 
-                }
-            ).join("");
+                        <p>
+                            <strong>
+                                Professional:
+                            </strong>
+                            ${providerName}
+                        </p>
+
+                        <p>
+                            <strong>
+                                Category:
+                            </strong>
+                            ${booking.category || "Not specified"}
+                        </p>
+
+                        <p>
+                            <strong>
+                                Date:
+                            </strong>
+                            ${bookingDate}
+                        </p>
+
+                        <p>
+                            <strong>
+                                Address:
+                            </strong>
+                            ${booking.address || "Not provided"}
+                        </p>
+
+                        <p>
+                            <strong>
+                                Price:
+                            </strong>
+                            ${price}
+                        </p>
+
+                        <p>
+                            <strong>
+                                Status:
+                            </strong>
+                            ${status}
+                        </p>
+
+                        ${
+                            booking.notes
+                                ? `
+                                    <p>
+                                        <strong>
+                                            Notes:
+                                        </strong>
+                                        ${booking.notes}
+                                    </p>
+                                  `
+                                : ""
+                        }
+
+                    </div>
+                `;
+
+            }).join("");
 
     }
-
-
     catch (error) {
 
         console.error(
@@ -1746,9 +1756,7 @@ async function viewBookings() {
             error
         );
 
-
         bookingsContainer.innerHTML = `
-
             <div class="dashboard-card">
 
                 <h3>
@@ -1768,11 +1776,8 @@ async function viewBookings() {
                 </button>
 
             </div>
-
         `;
-
     }
-
 }
 
 
@@ -2006,103 +2011,133 @@ async function loadProviderBookings() {
                                 : "Price unavailable";
 
 
-                    return `
+                  const actionButtons =
+    status.toUpperCase() === "PENDING"
+        ? `
+            <div class="booking-actions">
 
-                        <div class="dashboard-service-card">
+                <button
+                    class="accept-booking-btn"
+                    onclick="updateBookingStatus(${booking.bookingId}, 'ACCEPTED')">
 
-                            <div class="service-small-icon">
-                                📅
-                            </div>
+                    Accept
 
-
-                            <h3>
-                                ${serviceName}
-                            </h3>
-
-
-                            <p>
-                                <strong>
-                                    Customer:
-                                </strong>
-
-                                ${customerName}
-                            </p>
+                </button>
 
 
-                            <p>
-                                <strong>
-                                    Phone:
-                                </strong>
+                <button
+                    class="reject-booking-btn"
+                    onclick="updateBookingStatus(${booking.bookingId}, 'REJECTED')">
 
-                                ${customerPhone}
-                            </p>
+                    Reject
 
+                </button>
 
-                            <p>
-                                <strong>
-                                    Email:
-                                </strong>
-
-                                ${customerEmail}
-                            </p>
+            </div>
+          `
+        : "";
 
 
-                            <p>
-                                <strong>
-                                    Date:
-                                </strong>
+return `
 
-                                ${bookingDate}
-                            </p>
+    <div class="dashboard-service-card">
 
-
-                            <p>
-                                <strong>
-                                    Time:
-                                </strong>
-
-                                ${bookingTime}
-                            </p>
+        <div class="service-small-icon">
+            📅
+        </div>
 
 
-                            <p>
-                                <strong>
-                                    Address:
-                                </strong>
-
-                                ${address}
-                            </p>
+        <h3>
+            ${serviceName}
+        </h3>
 
 
-                            <p>
-                                <strong>
-                                    Problem:
-                                </strong>
+        <p>
+            <strong>
+                Customer:
+            </strong>
 
-                                ${problem}
-                            </p>
-
-
-                            <p>
-                                <strong>
-                                    Price:
-                                </strong>
-
-                                ${price}
-                            </p>
+            ${customerName}
+        </p>
 
 
-                            <p>
-                                <strong>
-                                    Status:
-                                </strong>
+        <p>
+            <strong>
+                Phone:
+            </strong>
 
-                                ${status}
-                            </p>
+            ${customerPhone}
+        </p>
 
-                        </div>
 
-                    `;
+        <p>
+            <strong>
+                Email:
+            </strong>
+
+            ${customerEmail}
+        </p>
+
+
+        <p>
+            <strong>
+                Date:
+            </strong>
+
+            ${bookingDate}
+        </p>
+
+
+        <p>
+            <strong>
+                Time:
+            </strong>
+
+            ${bookingTime}
+        </p>
+
+
+        <p>
+            <strong>
+                Address:
+            </strong>
+
+            ${address}
+        </p>
+
+
+        <p>
+            <strong>
+                Problem:
+            </strong>
+
+            ${problem}
+        </p>
+
+
+        <p>
+            <strong>
+                Price:
+            </strong>
+
+            ${price}
+        </p>
+
+
+        <p>
+            <strong>
+                Status:
+            </strong>
+
+            ${status}
+        </p>
+
+
+        ${actionButtons}
+
+    </div>
+
+`;
 
                 }
             ).join("");
@@ -2147,25 +2182,131 @@ async function loadProviderBookings() {
     }
 
 }
-
-
 // ============================================================
-// MY REVIEWS
+// PROVIDER - UPDATE BOOKING STATUS
 // ============================================================
 
-function viewReviews() {
+// ============================================================
+// PROVIDER - UPDATE BOOKING STATUS
+// ============================================================
 
-    alert(
-        "My Reviews will be connected next."
-    );
+async function updateBookingStatus(bookingId, status) {
+
+    if (
+        !loggedInUser ||
+        loggedInUser.role !== "PROVIDER"
+    ) {
+
+        alert(
+            "Only providers can update booking status."
+        );
+
+        return;
+    }
+
+
+    const action =
+        status === "ACCEPTED"
+            ? "accept"
+            : "reject";
+
+
+    const confirmed =
+        confirm(
+            `Are you sure you want to ${action} this booking?`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `http://localhost:8080/api/bookings/${bookingId}/status?status=${status}`,
+                {
+                    method: "PUT"
+                }
+            );
+
+
+        const responseText =
+            await response.text();
+
+
+        console.log(
+            "Update booking status response:",
+            response.status,
+            responseText
+        );
+
+
+        if (!response.ok) {
+
+            let errorMessage =
+                responseText ||
+                "Unable to update booking status.";
+
+
+            try {
+
+                const errorData =
+                    JSON.parse(responseText);
+
+
+                errorMessage =
+                    errorData.message ||
+                    errorData.error ||
+                    errorMessage;
+
+            }
+            catch (parseError) {
+
+                // Keep original response text
+            }
+
+
+            throw new Error(
+                errorMessage
+            );
+
+        }
+
+
+        alert(
+            status === "ACCEPTED"
+                ? "Booking accepted successfully!"
+                : "Booking rejected successfully!"
+        );
+
+
+        // Refresh provider bookings
+        await loadProviderBookings();
+
+    }
+    catch (error) {
+
+        console.error(
+            "Update booking status error:",
+            error
+        );
+
+
+        alert(
+            error.message ||
+            "Something went wrong while updating the booking."
+        );
+
+    }
 
 }
-
 
 // ============================================================
 // SELECT SERVICE
 // ============================================================
-
 function selectService(serviceId) {
 
     const service =
@@ -2210,47 +2351,50 @@ function selectService(serviceId) {
             : "Price unavailable";
 
 
-    let bookingDate =
+    // ========================================================
+    // ASK FOR DATE
+    // ========================================================
+
+    let dateInput =
         prompt(
 
             `Book: ${serviceName}\n\n` +
 
             `Price: ${servicePrice}\n\n` +
 
-            `Enter booking date and time.\n` +
+            `Enter booking date.\n\n` +
 
-            `Format: YYYY-MM-DDTHH:MM\n\n` +
+            `Format: D-M-YYYY\n\n` +
 
-            `Example: 2026-09-15T14:30`
+            `Example: 15-9-2026`
 
         );
 
 
-    if (!bookingDate) {
+    if (!dateInput) {
         return;
     }
 
 
-    bookingDate =
-        bookingDate.trim();
+    dateInput =
+        dateInput.trim();
 
 
-    bookingDate =
-        bookingDate.replace(
-            " ",
-            "T"
+    // ========================================================
+    // VALIDATE DATE
+    // ========================================================
+
+    const datePattern =
+        /^(\d{1,2})-(\d{1,2})-(\d{4})$/;
+
+
+    const dateMatch =
+        dateInput.match(
+            datePattern
         );
 
 
-    const datePattern =
-        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
-
-
-    if (
-        !datePattern.test(
-            bookingDate
-        )
-    ) {
+    if (!dateMatch) {
 
         alert(
 
@@ -2258,7 +2402,7 @@ function selectService(serviceId) {
 
             "Please enter the date like this:\n\n" +
 
-            "2026-09-15T14:30"
+            "15-9-2026"
 
         );
 
@@ -2267,16 +2411,38 @@ function selectService(serviceId) {
     }
 
 
-    const selectedDate =
-        new Date(
-            bookingDate
+    const day =
+        Number(
+            dateMatch[1]
         );
 
 
+    const month =
+        Number(
+            dateMatch[2]
+        );
+
+
+    const year =
+        Number(
+            dateMatch[3]
+        );
+
+
+    // JavaScript months start from 0
+    const selectedDate =
+        new Date(
+            year,
+            month - 1,
+            day
+        );
+
+
+    // Make sure the date actually exists
     if (
-        Number.isNaN(
-            selectedDate.getTime()
-        )
+        selectedDate.getFullYear() !== year ||
+        selectedDate.getMonth() !== month - 1 ||
+        selectedDate.getDate() !== day
     ) {
 
         alert(
@@ -2288,17 +2454,99 @@ function selectService(serviceId) {
     }
 
 
+    // ========================================================
+    // ASK FOR TIME
+    // ========================================================
+
+    let timeInput =
+        prompt(
+
+            `Enter booking time.\n\n` +
+
+            `Format: HH:MM (24-hour)\n\n` +
+
+            `Example: 14:30`
+
+        );
+
+
+    if (!timeInput) {
+        return;
+    }
+
+
+    timeInput =
+        timeInput.trim();
+
+
+    // ========================================================
+    // VALIDATE TIME
+    // ========================================================
+
+    const timePattern =
+        /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+
+    const timeMatch =
+        timeInput.match(
+            timePattern
+        );
+
+
+    if (!timeMatch) {
+
+        alert(
+
+            "Invalid time format.\n\n" +
+
+            "Please enter the time like this:\n\n" +
+
+            "14:30"
+
+        );
+
+        return;
+
+    }
+
+
+    const hours =
+        Number(
+            timeMatch[1]
+        );
+
+
+    const minutes =
+        Number(
+            timeMatch[2]
+        );
+
+
+    // ========================================================
+    // CHECK FUTURE DATE + TIME
+    // ========================================================
+
+    const selectedDateTime =
+        new Date(
+            year,
+            month - 1,
+            day,
+            hours,
+            minutes
+        );
+
+
     const now =
         new Date();
 
 
     if (
-        selectedDate <= now
+        selectedDateTime <= now
     ) {
 
         alert(
 
-            "Booking date must be in the future.\n\n" +
+            "Booking date and time must be in the future.\n\n" +
 
             "Please choose a future date and time."
 
@@ -2308,6 +2556,47 @@ function selectService(serviceId) {
 
     }
 
+
+    // ========================================================
+    // CONVERT TO BACKEND FORMAT
+    // YYYY-MM-DDTHH:MM
+    // ========================================================
+
+    const formattedMonth =
+        String(month).padStart(
+            2,
+            "0"
+        );
+
+
+    const formattedDay =
+        String(day).padStart(
+            2,
+            "0"
+        );
+
+
+    const formattedHours =
+        String(hours).padStart(
+            2,
+            "0"
+        );
+
+
+    const formattedMinutes =
+        String(minutes).padStart(
+            2,
+            "0"
+        );
+
+
+    const bookingDate =
+        `${year}-${formattedMonth}-${formattedDay}T${formattedHours}:${formattedMinutes}`;
+
+
+    // ========================================================
+    // ASK FOR ADDRESS
+    // ========================================================
 
     const address =
         prompt(
@@ -2320,11 +2609,19 @@ function selectService(serviceId) {
     }
 
 
+    // ========================================================
+    // ASK FOR NOTES
+    // ========================================================
+
     const notes =
         prompt(
             "Any additional notes? (Optional)"
         );
 
+
+    // ========================================================
+    // CREATE BOOKING
+    // ========================================================
 
     createBooking(
         serviceId,
@@ -2845,9 +3142,8 @@ if (serviceForm) {
             if (
                 !serviceName ||
                 !category ||
-                !price ||
-                !serviceLocation ||
-                !description
+                !price 
+                
             ) {
 
                 alert(
@@ -2891,10 +3187,10 @@ if (serviceForm) {
                                     Number(price),
 
                                location:
-    serviceLocation,
+    serviceLocation || "",
 
                                 description:
-                                    description
+                                    description ||""
 
                             })
 
@@ -3123,7 +3419,7 @@ document.addEventListener(
 
         // Customer account
 
-        populateCustomerAccount();
+        populateUserAccount();
 
 
         // Customer categories

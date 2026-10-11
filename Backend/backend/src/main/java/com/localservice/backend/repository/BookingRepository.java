@@ -10,29 +10,29 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     @EntityGraph(attributePaths = {
             "customer",
-            "service",
-            "service.provider"
+            "provider",
+            "service"
     })
     List<Booking> findAll();
 
     @EntityGraph(attributePaths = {
             "customer",
-            "service",
-            "service.provider"
+            "provider",
+            "service"
     })
     List<Booking> findByCustomerUserId(Integer customerId);
 
     @EntityGraph(attributePaths = {
             "customer",
-            "service",
-            "service.provider"
+            "provider",
+            "service"
     })
-    List<Booking> findByServiceProviderUserId(Integer providerId);
+    List<Booking> findByProviderUserUserId(Integer providerUserId);
 
     @EntityGraph(attributePaths = {
             "customer",
-            "service",
-            "service.provider"
+            "provider",
+            "service"
     })
     List<Booking> findByStatus(String status);
 }
